@@ -8,253 +8,131 @@
 <title>Sudoku</title>
 <style>
 :root {
-  --bg:#f5f4ef;
-  --paper:#fff;
-  --ink:#30352e;
-  --muted:#92958b;
-  --line:#dedfd7;
-  --accent:#526b57;
-  --soft:#e5ede4;
-  --red:#f8e5e1;
+  --bg:#f5f4ef;--paper:#fff;--ink:#30352e;
+  --muted:#92958b;--line:#dedfd7;--accent:#526b57;
+  --soft:#e5ede4;--red:#f8e5e1;--peer:#f0f3ed;
+  --same:#e4eee2;--error:#b34c3d;
 }
-* {box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body {
-  margin:0;
-  background:var(--bg);
-  color:var(--ink);
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
   font-weight:400;
 }
-button {font:inherit;cursor:pointer}
-.app {
-  width:100%;
-  max-width:480px;
-  margin:auto;
+button{font:inherit;cursor:pointer;touch-action:manipulation}
+.app{
+  width:100%;max-width:480px;margin:auto;
   padding:calc(15px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom));
 }
-header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:23px;
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:23px}
+.logo{font-size:27px;font-weight:550;letter-spacing:-1.3px}
+.logo span{color:var(--accent)}
+.header-actions{display:flex;gap:7px}
+.new-game,.settings-button{
+  background:transparent;border:1px solid var(--line);
+  border-radius:11px;padding:9px 11px;color:var(--ink);
+  font-size:12px;font-weight:450;
 }
-.logo {
-  font-size:27px;
-  font-weight:550;
-  letter-spacing:-1.3px;
+.info{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;color:var(--muted);font-size:11px;font-weight:500;letter-spacing:.7px}
+#timer{font-size:13px;letter-spacing:1px;font-variant-numeric:tabular-nums}
+.board{
+  display:grid;grid-template-columns:repeat(9,minmax(0,1fr));
+  aspect-ratio:1;width:100%;background:var(--paper);
+  border:1.5px solid var(--accent);border-radius:4px;overflow:hidden;
 }
-.logo span {color:var(--accent)}
-.new-game {
-  background:transparent;
-  border:1px solid #d9dbd2;
-  border-radius:12px;
-  padding:10px 15px;
-  color:var(--ink);
-  font-size:13px;
-  font-weight:450;
+.cell{
+  position:relative;display:flex;justify-content:center;align-items:center;
+  min-width:0;padding:0;border:0;border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);border-radius:0;
+  background:var(--paper);color:var(--accent);
+  font-size:clamp(20px,6vw,27px);font-weight:400;line-height:1;
 }
-.info {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:12px;
-  color:var(--muted);
-  font-size:11px;
-  font-weight:500;
-  letter-spacing:.7px;
-}
-#timer {
-  font-size:13px;
-  letter-spacing:1px;
-  font-variant-numeric:tabular-nums;
-}
-.board {
-  display:grid;
-  grid-template-columns:repeat(9,minmax(0,1fr));
-  aspect-ratio:1;
-  width:100%;
-  background:white;
-  border:1.5px solid #788174;
-  border-radius:4px;
-  overflow:hidden;
-  touch-action:manipulation;
-}
-.cell {
-  position:relative;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-width:0;
-  padding:0;
-  border:0;
-  border-right:1px solid var(--line);
-  border-bottom:1px solid var(--line);
-  border-radius:0;
-  background:white;
-  color:#526b57;
-  font-size:clamp(20px,6vw,27px);
-  font-weight:400;
-  line-height:1;
-}
-.cell:nth-child(3n) {border-right:1.5px solid #a1a699}
-.cell:nth-child(9n) {border-right:0}
+.cell:nth-child(3n){border-right:1.5px solid var(--accent)}
+.cell:nth-child(9n){border-right:0}
 .cell:nth-child(n+19):nth-child(-n+27),
-.cell:nth-child(n+46):nth-child(-n+54) {
-  border-bottom:1.5px solid #a1a699;
+.cell:nth-child(n+46):nth-child(-n+54){border-bottom:1.5px solid var(--accent)}
+.cell:nth-child(n+73){border-bottom:0}
+.cell.given{color:var(--ink);font-weight:550}
+.cell.selected{background:var(--soft)!important}
+.cell.peer{background:var(--peer)}
+.cell.same{background:var(--same)}
+.cell.error{background:var(--red)!important;color:var(--error)}
+.notes{
+  position:absolute;inset:2px;display:grid;
+  grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
+  align-items:center;justify-items:center;
+  font-size:clamp(8px,2.5vw,11px);color:var(--accent);font-weight:400;
+  pointer-events:none;
 }
-.cell:nth-child(n+73) {border-bottom:0}
-.cell.given {
-  color:#30352e;
-  font-weight:550;
+.tools{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:15px 0 12px}
+.tool{
+  min-height:42px;padding:8px 3px;background:var(--soft);
+  border:1px solid transparent;border-radius:10px;
+  color:var(--ink);font-size:11px;font-weight:450;white-space:nowrap;
 }
-.cell.selected {background:#dce9dc!important}
-.cell.peer {background:#f0f3ed}
-.cell.same {background:#e4eee2}
-.cell.error {background:var(--red)!important;color:#b34c3d}
-.notes {
-  position:absolute;
-  inset:2px;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  grid-template-rows:repeat(3,1fr);
-  align-items:center;
-  justify-items:center;
-  font-size:clamp(8px,2.5vw,11px);
-  color:#718071;
-  font-weight:400;
+.tool.active{border-color:var(--accent);color:var(--accent)}
+.numbers{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:5px;margin-bottom:13px}
+.num{
+  min-width:0;padding:8px 0 6px;border:1px solid transparent;
+  border-radius:9px;background:var(--paper);color:var(--ink);
+  font-size:21px;font-weight:450;
 }
-.tools {
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:7px;
-  margin:15px 0 12px;
-}
-.tool {
-  min-height:42px;
-  padding:8px 3px;
-  background:#e9e8e1;
-  border:1px solid transparent;
-  border-radius:10px;
-  color:#50554b;
-  font-size:11px;
-  font-weight:450;
-  white-space:nowrap;
-}
-.tool.active {
-  background:var(--soft);
-  border-color:#c9d7c8;
-  color:var(--accent);
-}
-.numbers {
-  display:grid;
-  grid-template-columns:repeat(9,minmax(0,1fr));
-  gap:5px;
-  margin-bottom:13px;
-}
-.num {
-  min-width:0;
-  padding:8px 0 6px;
-  border:1px solid transparent;
-  border-radius:9px;
-  background:white;
-  color:#344237;
-  font-size:21px;
-  font-weight:450;
-}
-.num small {
-  display:block;
-  margin-top:2px;
-  color:var(--muted);
-  font-size:9px;
-  font-weight:400;
-}
-.num:disabled {opacity:.28}
-.actions {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:9px;
-}
-.action {
-  min-height:45px;
-  border:0;
-  border-radius:11px;
-  padding:12px;
-  font-size:13px;
-  font-weight:450;
-}
-.primary {background:var(--accent);color:white}
-.secondary {background:#e9e8e1;color:#42473f}
-.status {
-  min-height:20px;
-  margin-top:12px;
-  text-align:center;
-  color:var(--muted);
-  font-size:11px;
-  font-weight:400;
-}
-.overlay {
-  position:fixed;
-  inset:0;
-  z-index:5;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:18px;
+.num small{display:block;margin-top:2px;color:var(--muted);font-size:9px;font-weight:400}
+.num:disabled{opacity:.28}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.action{min-height:45px;border:0;border-radius:11px;padding:12px;font-size:13px;font-weight:450}
+.primary{background:var(--accent);color:white}
+.secondary{background:var(--soft);color:var(--ink)}
+.status{min-height:20px;margin-top:12px;text-align:center;color:var(--muted);font-size:11px}
+.overlay{
+  position:fixed;inset:0;z-index:5;display:none;
+  align-items:center;justify-content:center;padding:18px;
   background:#20251dcc;
 }
-.overlay.show {display:flex}
-.modal {
-  width:min(100%,390px);
-  padding:25px 22px;
-  border-radius:20px;
-  background:white;
-}
-.modal h2 {
-  margin:0 0 8px;
-  font-size:22px;
-  font-weight:500;
-  letter-spacing:-.5px;
-}
-.modal p {
-  color:var(--muted);
-  font-size:13px;
-  line-height:1.5;
-  font-weight:400;
-}
-.choices {
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:7px;
-  margin:19px 0;
-}
-.choice {
-  min-height:65px;
-  padding:10px 3px;
-  border:1px solid var(--line);
-  border-radius:11px;
-  background:white;
+.overlay.show{display:flex}
+.modal{
+  width:min(100%,390px);max-height:88dvh;overflow-y:auto;
+  padding:25px 22px;border-radius:20px;background:var(--paper);
   color:var(--ink);
-  font-size:12px;
-  font-weight:450;
 }
-.choice.active {
-  border:1.5px solid var(--accent);
-  background:var(--soft);
-  color:var(--accent);
+.modal h2{margin:0 0 8px;font-size:22px;font-weight:500;letter-spacing:-.5px}
+.modal p{color:var(--muted);font-size:13px;line-height:1.5;font-weight:400}
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:19px 0}
+.choice{
+  min-height:65px;padding:10px 3px;border:1px solid var(--line);
+  border-radius:11px;background:var(--paper);color:var(--ink);
+  font-size:12px;font-weight:450;
 }
-.choice small {
-  display:block;
-  margin-top:5px;
-  color:var(--muted);
-  font-size:9px;
-  font-weight:400;
+.choice.active{border:1.5px solid var(--accent);background:var(--soft);color:var(--accent)}
+.choice small{display:block;margin-top:5px;color:var(--muted);font-size:9px;font-weight:400}
+.modal .action{width:100%}
+.section-title{margin:20px 0 10px;font-size:12px;font-weight:550;letter-spacing:.5px}
+.setting-row{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;padding:12px 0;border-bottom:1px solid var(--line);
+  font-size:13px;font-weight:400;
 }
-.modal .action {width:100%}
-@media(max-height:760px) {
-  .app {padding-top:calc(8px + env(safe-area-inset-top))}
-  header {margin-bottom:13px}
-  .tools {margin-top:11px}
-  .num {padding-top:6px;padding-bottom:5px}
+.setting-row small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.setting-row input{width:20px;height:20px;accent-color:var(--accent);flex-shrink:0}
+.palette-list{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.palette{
+  border:1px solid var(--line);border-radius:12px;padding:11px;
+  background:var(--paper);color:var(--ink);text-align:left;font-size:12px;
+}
+.palette.active{border:1.5px solid var(--accent);background:var(--soft)}
+.swatches{display:flex;gap:5px;margin-bottom:8px}
+.swatch{width:19px;height:19px;border-radius:50%;border:1px solid #00000012}
+.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px}
+@media(max-width:370px){
+  .app{padding-left:11px;padding-right:11px}
+  .tools{gap:5px}.tool{font-size:10px}
+  .numbers{gap:3px}
+  .new-game,.settings-button{padding:8px;font-size:11px}
+}
+@media(max-height:760px){
+  .app{padding-top:calc(8px + env(safe-area-inset-top))}
+  header{margin-bottom:13px}
+  .tools{margin-top:11px}
 }
 </style>
 </head>
@@ -262,30 +140,27 @@ header {
 <main class="app">
 <header>
   <div class="logo">s<span>u</span>doku.</div>
-  <button class="new-game" id="new">Новая игра</button>
+  <div class="header-actions">
+    <button class="settings-button" id="settingsOpen">Настройки</button>
+    <button class="new-game" id="new">Новая игра</button>
+  </div>
 </header>
-
 <div class="info">
   <span id="level">СРЕДНЯЯ СЛОЖНОСТЬ</span>
   <span id="timer">00:00</span>
 </div>
-
 <div class="board" id="board"></div>
-
 <div class="tools">
   <button class="tool" id="pencil">Карандаш</button>
   <button class="tool" id="erase">Стереть</button>
   <button class="tool" id="undo">Отменить</button>
   <button class="tool" id="check">Проверить</button>
 </div>
-
 <div class="numbers" id="numbers"></div>
-
 <div class="actions">
   <button class="action secondary" id="hint">Подсказка · 3</button>
   <button class="action primary" id="pause">Пауза</button>
 </div>
-
 <div class="status" id="status">Выбери клетку и цифру</div>
 </main>
 
@@ -294,17 +169,40 @@ header {
     <h2>Новая партия</h2>
     <p>Выбери уровень сложности.</p>
     <div class="choices">
-      <button class="choice" data-level="medium">
-        Средняя<small>36 цифр</small>
-      </button>
-      <button class="choice active" data-level="hard">
-        Сложная<small>30 цифр</small>
-      </button>
-      <button class="choice" data-level="expert">
-        Эксперт<small>27 цифр</small>
-      </button>
+      <button class="choice" data-level="medium">Средняя<small>36 цифр</small></button>
+      <button class="choice active" data-level="hard">Сложная<small>30 цифр</small></button>
+      <button class="choice" data-level="expert">Эксперт<small>27 цифр</small></button>
     </div>
     <button class="action primary" id="startGame">Начать игру</button>
+  </div>
+</div>
+
+<div class="overlay" id="settingsModal">
+  <div class="modal">
+    <h2>Настройки</h2>
+    <p>Настрой игру так, как удобно тебе.</p>
+
+    <div class="section-title">ПОДСВЕТКА</div>
+    <label class="setting-row">
+      <span>Строка, столбец и блок<small>Выделение области выбранной клетки</small></span>
+      <input type="checkbox" id="highlightPeers">
+    </label>
+    <label class="setting-row">
+      <span>Одинаковые цифры<small>Выделять совпадающие числа</small></span>
+      <input type="checkbox" id="highlightSame">
+    </label>
+    <label class="setting-row">
+      <span>Ошибки<small>Подсвечивать неверно введённые цифры</small></span>
+      <input type="checkbox" id="highlightErrors">
+    </label>
+
+    <div class="section-title">ЦВЕТОВАЯ ПАЛИТРА</div>
+    <div class="palette-list" id="paletteList"></div>
+
+    <div class="modal-actions">
+      <button class="action secondary" id="settingsCancel">Закрыть</button>
+      <button class="action primary" id="settingsSave">Сохранить</button>
+    </div>
   </div>
 </div>
 
@@ -327,27 +225,138 @@ header {
 <script>
 const $=id=>document.getElementById(id);
 
-const levels={
-  medium:36,
-  hard:30,
-  expert:27
-};
-
+const levels={medium:36,hard:30,expert:27};
 const levelNames={
   medium:"СРЕДНЯЯ СЛОЖНОСТЬ",
   hard:"СЛОЖНАЯ",
   expert:"ЭКСПЕРТ"
 };
 
-let level="medium";
-let solution=[],puzzle=[],values=[],notes=[];
-let selected=-1;
-let pencil=false;
-let hints=3;
-let seconds=0;
-let history=[];
-let paused=false;
-let interval=null;
+const palettes={
+  green:{
+    name:"Зелёная",
+    bg:"#f5f4ef",paper:"#ffffff",ink:"#30352e",
+    muted:"#92958b",line:"#dedfd7",accent:"#526b57",
+    soft:"#e5ede4",red:"#f8e5e1",peer:"#f0f3ed",
+    same:"#e4eee2",error:"#b34c3d"
+  },
+  mono:{
+    name:"Монохромная",
+    bg:"#f1f1ef",paper:"#ffffff",ink:"#292929",
+    muted:"#888888",line:"#dededb",accent:"#454545",
+    soft:"#e7e7e5",red:"#eeeeee",peer:"#f0f0ee",
+    same:"#e1e1df",error:"#555555"
+  },
+  lavender:{
+    name:"Лавандовая",
+    bg:"#f3f0f5",paper:"#ffffff",ink:"#302b37",
+    muted:"#918899",line:"#e2dce8",accent:"#796b88",
+    soft:"#e8e0ef",red:"#f2e5e9",peer:"#f0ebf3",
+    same:"#e7deee",error:"#a65f76"
+  },
+  blue:{
+    name:"Голубая",
+    bg:"#eff3f4",paper:"#ffffff",ink:"#29383d",
+    muted:"#87969b",line:"#dce5e7",accent:"#607d89",
+    soft:"#dce9ed",red:"#f4e6e3",peer:"#edf2f3",
+    same:"#dfeaed",error:"#a85e55"
+  },
+  sand:{
+    name:"Песочная",
+    bg:"#f5f0e8",paper:"#fffdf9",ink:"#3c342b",
+    muted:"#998b78",line:"#e6ddcf",accent:"#987c58",
+    soft:"#eadfcd",red:"#f3e4dc",peer:"#f1eadd",
+    same:"#e9dfcf",error:"#a45e49"
+  }
+};
+
+let prefs={
+  palette:"green",
+  highlightPeers:true,
+  highlightSame:true,
+  highlightErrors:true
+};
+
+let level="medium",solution=[],puzzle=[],values=[],notes=[];
+let selected=-1,pencil=false,hints=3,seconds=0;
+let history=[],paused=false,interval=null;
+
+function applyPalette(name){
+  let p=palettes[name]||palettes.green;
+  let root=document.documentElement;
+  let keys={
+    bg:"bg",paper:"paper",ink:"ink",muted:"muted",
+    line:"line",accent:"accent",soft:"soft",red:"red",
+    peer:"peer",same:"same",error:"error"
+  };
+  Object.entries(keys).forEach(([css,key])=>{
+    root.style.setProperty("--"+css,p[key]);
+  });
+  document.querySelector('meta[name="theme-color"]').content=p.bg;
+}
+
+function loadPrefs(){
+  try{
+    let p=JSON.parse(localStorage.getItem("sudoku-settings"));
+    if(p)prefs={...prefs,...p};
+  }catch(e){}
+  if(!palettes[prefs.palette])prefs.palette="green";
+  applyPalette(prefs.palette);
+}
+
+function savePrefs(){
+  try{
+    localStorage.setItem("sudoku-settings",JSON.stringify(prefs));
+  }catch(e){}
+}
+
+function renderPaletteChoices(){
+  let box=$("paletteList");
+  box.innerHTML="";
+  Object.entries(palettes).forEach(([key,p])=>{
+    let b=document.createElement("button");
+    b.className="palette"+(prefs.palette===key?" active":"");
+    b.innerHTML=
+      '<div class="swatches">'+
+      [p.accent,p.soft,p.ink].map(c=>
+        '<span class="swatch" style="background:'+c+'"></span>'
+      ).join("")+
+      '</div>'+p.name;
+    b.onclick=()=>{
+      prefs.palette=key;
+      applyPalette(key);
+      renderPaletteChoices();
+    };
+    box.append(b);
+  });
+}
+
+function openSettings(){
+  $("highlightPeers").checked=prefs.highlightPeers;
+  $("highlightSame").checked=prefs.highlightSame;
+  $("highlightErrors").checked=prefs.highlightErrors;
+  renderPaletteChoices();
+  $("settingsModal").classList.add("show");
+}
+
+function closeSettings(){
+  $("settingsModal").classList.remove("show");
+}
+
+$("settingsOpen").onclick=openSettings;
+$("settingsCancel").onclick=()=>{
+  loadPrefs();
+  closeSettings();
+  render();
+};
+$("settingsSave").onclick=()=>{
+  prefs.highlightPeers=$("highlightPeers").checked;
+  prefs.highlightSame=$("highlightSame").checked;
+  prefs.highlightErrors=$("highlightErrors").checked;
+  savePrefs();
+  closeSettings();
+  render();
+};
 
 function shuffle(a){
   for(let i=a.length-1;i>0;i--){
@@ -369,83 +378,56 @@ function generate(){
     shuffle([0,1,2]).map(x=>g*3+x)
   );
   let nums=shuffle([1,2,3,4,5,6,7,8,9]);
-
-  return rows.flatMap(r=>
-    cols.map(c=>nums[pattern(r,c)])
-  );
+  return rows.flatMap(r=>cols.map(c=>nums[pattern(r,c)]));
 }
 
 function valid(g,i,n){
   let r=Math.floor(i/9),c=i%9;
-
   for(let k=0;k<9;k++){
     if(g[r*9+k]===n||g[k*9+c]===n)return false;
   }
-
-  let br=Math.floor(r/3)*3;
-  let bc=Math.floor(c/3)*3;
-
+  let br=Math.floor(r/3)*3,bc=Math.floor(c/3)*3;
   for(let y=0;y<3;y++){
     for(let x=0;x<3;x++){
       if(g[(br+y)*9+bc+x]===n)return false;
     }
   }
-
   return true;
 }
 
 function countSolutions(g,limit){
   let i=g.indexOf(0);
   if(i<0)return 1;
-
   let count=0;
-
   for(let n=1;n<=9;n++){
     if(valid(g,i,n)){
       g[i]=n;
       count+=countSolutions(g,limit-count);
       g[i]=0;
-
       if(count>=limit)return count;
     }
   }
-
   return count;
 }
 
 function createGame(){
   solution=generate();
   puzzle=solution.slice();
-
-  let cells=shuffle(
-    Array.from({length:81},(_,i)=>i)
-  );
+  let cells=shuffle(Array.from({length:81},(_,i)=>i));
 
   for(let i of cells){
     if(puzzle.filter(Boolean).length<=levels[level])break;
-
     let old=puzzle[i];
     puzzle[i]=0;
-
-    if(countSolutions(puzzle.slice(),2)!==1){
-      puzzle[i]=old;
-    }
+    if(countSolutions(puzzle.slice(),2)!==1)puzzle[i]=old;
   }
 
   values=puzzle.slice();
   notes=Array.from({length:81},()=>[]);
-
-  selected=-1;
-  hints=3;
-  seconds=0;
-  history=[];
-  paused=false;
-  pencil=false;
-
+  selected=-1;pencil=false;hints=3;seconds=0;
+  history=[];paused=false;
   clearInterval(interval);
-  startTimer();
-  save();
-  render();
+  startTimer();save();render();
 }
 
 function save(){
@@ -459,110 +441,77 @@ function save(){
 function load(){
   try{
     let s=JSON.parse(localStorage.getItem("sudoku-game"));
-
     if(!s||s.values?.length!==81)return false;
-
     level=s.level||"medium";
     if(!levels[level])level="medium";
-
-    solution=s.solution;
-    puzzle=s.puzzle;
-    values=s.values;
+    solution=s.solution;puzzle=s.puzzle;values=s.values;
     notes=s.notes||Array.from({length:81},()=>[]);
-    hints=s.hints??3;
-    seconds=s.seconds||0;
-
-    history=[];
-    render();
-    startTimer();
-
+    hints=s.hints??3;seconds=s.seconds||0;
+    history=[];render();startTimer();
     return true;
-  }catch(e){
-    return false;
-  }
+  }catch(e){return false}
 }
 
 function snapshot(){
-  history.push({
-    values:values.slice(),
-    notes:notes.map(x=>x.slice())
-  });
+  history.push({values:values.slice(),notes:notes.map(x=>x.slice())});
 }
 
 function render(){
   $("board").innerHTML="";
-
   let sv=selected>=0?values[selected]:0;
 
   for(let i=0;i<81;i++){
     let b=document.createElement("button");
     b.className="cell";
-
     let v=values[i];
 
     if(puzzle[i])b.classList.add("given");
     if(i===selected)b.classList.add("selected");
 
     else if(selected>=0){
-      let r=Math.floor(i/9);
-      let c=i%9;
-      let sr=Math.floor(selected/9);
-      let sc=selected%9;
+      let r=Math.floor(i/9),c=i%9;
+      let sr=Math.floor(selected/9),sc=selected%9;
 
-      if(r===sr||c===sc||
+      let inPeer=r===sr||c===sc||
         (Math.floor(r/3)===Math.floor(sr/3)&&
-         Math.floor(c/3)===Math.floor(sc/3))){
-        b.classList.add("peer");
-      }
+         Math.floor(c/3)===Math.floor(sc/3));
 
-      if(sv&&v===sv)b.classList.add("same");
+      if(prefs.highlightPeers&&inPeer)b.classList.add("peer");
+      if(prefs.highlightSame&&sv&&v===sv)b.classList.add("same");
     }
 
-    if(v&&puzzle[i]===0&&v!==solution[i]){
+    if(prefs.highlightErrors&&v&&puzzle[i]===0&&v!==solution[i]){
       b.classList.add("error");
     }
 
-    if(v){
-      b.textContent=v;
-    }else if(notes[i].length){
+    if(v)b.textContent=v;
+    else if(notes[i].length){
       let ns=document.createElement("span");
       ns.className="notes";
-
       for(let n=1;n<=9;n++){
         let s=document.createElement("span");
         s.textContent=notes[i].includes(n)?n:"";
         ns.append(s);
       }
-
       b.append(ns);
     }
 
     b.onclick=()=>{
-      if(!paused){
-        selected=i;
-        render();
-      }
+      if(!paused){selected=i;render()}
     };
-
     $("board").append(b);
   }
 
   let counts=Array(10).fill(0);
-
-  values.forEach(v=>{
-    if(v)counts[v]++;
-  });
-
+  values.forEach(v=>{if(v)counts[v]++});
   $("numbers").innerHTML="";
 
   for(let n=1;n<=9;n++){
     let b=document.createElement("button");
     b.className="num";
     b.disabled=counts[n]>=9||paused;
-
     b.innerHTML=n+"<small>"+(9-counts[n])+"</small>";
     b.onclick=()=>place(n);
-
     $("numbers").append(b);
   }
 
@@ -571,13 +520,11 @@ function render(){
   $("undo").disabled=!history.length;
   $("hint").textContent="Подсказка · "+hints;
   $("hint").disabled=hints===0;
-
   $("level").textContent=levelNames[level];
 }
 
 function place(n){
   if(selected<0||puzzle[selected]||paused)return;
-
   snapshot();
 
   if(pencil){
@@ -587,27 +534,21 @@ function place(n){
   }else{
     values[selected]=n;
     notes[selected]=[];
-
     for(let i=0;i<81;i++){
       notes[i]=notes[i].filter(x=>x!==n);
     }
   }
 
-  render();
-  save();
-
+  render();save();
   if(values.every((v,i)=>v===solution[i]))win();
 }
 
 function startTimer(){
   clearInterval(interval);
   updateTimer();
-
   interval=setInterval(()=>{
     if(!paused){
-      seconds++;
-      updateTimer();
-
+      seconds++;updateTimer();
       if(seconds%5===0)save();
     }
   },1000);
@@ -621,26 +562,17 @@ function updateTimer(){
 
 function win(){
   clearInterval(interval);
-
-  $("winText").textContent=
-    "Время: "+$("timer").textContent+". Отличная работа!";
-
+  $("winText").textContent="Время: "+$("timer").textContent+". Отличная работа!";
   $("win").classList.add("show");
   save();
 }
 
-function newModal(){
-  $("start").classList.add("show");
-}
-
+function newModal(){$("start").classList.add("show")}
 $("new").onclick=newModal;
 
 document.querySelectorAll(".choice").forEach(b=>{
   b.onclick=()=>{
-    document.querySelectorAll(".choice").forEach(x=>
-      x.classList.remove("active")
-    );
-
+    document.querySelectorAll(".choice").forEach(x=>x.classList.remove("active"));
     b.classList.add("active");
     level=b.dataset.level;
   };
@@ -648,10 +580,8 @@ document.querySelectorAll(".choice").forEach(b=>{
 
 $("startGame").onclick=()=>{
   level=document.querySelector(".choice.active").dataset.level;
-
   $("start").classList.remove("show");
   $("win").classList.remove("show");
-
   createGame();
 };
 
@@ -660,67 +590,37 @@ $("again").onclick=()=>{
   newModal();
 };
 
-$("pencil").onclick=()=>{
-  pencil=!pencil;
-  render();
-};
+$("pencil").onclick=()=>{pencil=!pencil;render()};
 
 $("erase").onclick=()=>{
   if(selected<0||puzzle[selected]||paused)return;
-
-  snapshot();
-  values[selected]=0;
-  notes[selected]=[];
-
-  render();
-  save();
+  snapshot();values[selected]=0;notes[selected]=[];
+  render();save();
 };
 
 $("undo").onclick=()=>{
   let s=history.pop();
   if(!s)return;
-
-  values=s.values;
-  notes=s.notes;
-
-  render();
-  save();
+  values=s.values;notes=s.notes;
+  render();save();
 };
 
 $("check").onclick=()=>{
-  let bad=values.filter((v,i)=>
-    v&&puzzle[i]===0&&v!==solution[i]
-  ).length;
-
-  $("status").textContent=
-    bad?"Ошибок: "+bad:"Ошибок не найдено";
+  let bad=values.filter((v,i)=>v&&puzzle[i]===0&&v!==solution[i]).length;
+  $("status").textContent=bad?"Ошибок: "+bad:"Ошибок не найдено";
 };
 
 $("hint").onclick=()=>{
   if(!hints||paused)return;
-
-  let empty=values
-    .map((v,i)=>!v&&!puzzle[i]?i:-1)
-    .filter(i=>i>=0);
-
+  let empty=values.map((v,i)=>!v&&!puzzle[i]?i:-1).filter(i=>i>=0);
   if(!empty.length)return;
 
   let i=selected>=0&&empty.includes(selected)
-    ?selected
-    :empty[Math.floor(Math.random()*empty.length)];
+    ?selected:empty[Math.floor(Math.random()*empty.length)];
 
-  snapshot();
-
-  selected=i;
-  values[i]=solution[i];
-  notes[i]=[];
-  hints--;
-
-  render();
-  save();
-
+  snapshot();selected=i;values[i]=solution[i];notes[i]=[];hints--;
+  render();save();
   $("status").textContent="Подсказка использована";
-
   if(values.every((v,j)=>v===solution[j]))win();
 };
 
@@ -738,15 +638,11 @@ $("resume").onclick=()=>{
 
 document.addEventListener("keydown",e=>{
   if(e.key>="1"&&e.key<="9")place(+e.key);
-
-  if(e.key==="Backspace"||e.key==="Delete"){
-    $("erase").click();
-  }
+  if(e.key==="Backspace"||e.key==="Delete")$("erase").click();
 });
 
+loadPrefs();
 if(!load())newModal();
 </script>
 </body>
 </html>
-
-
