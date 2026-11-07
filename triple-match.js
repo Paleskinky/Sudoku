@@ -4,7 +4,6 @@
     ["●", "#D78F83"], ["◆", "#9B9BB8"], ["▲", "#91A58A"], ["✿", "#D5AC72"],
     ["■", "#8FAEB0"], ["♥", "#C58C9C"], ["✦", "#B49A79"], ["⬟", "#929B83"]
   ];
-
   const style = document.createElement("style");
   style.textContent = `
     #triple-game {
