@@ -604,7 +604,7 @@
       doMove(v.id,action[1]);
     }
   });
-  window.startTrafficJam=()=>{
+    window.startTrafficJam=()=>{
     root.style.display='block';
     level=progress[mode].level||1;
     makeLevel();
@@ -612,7 +612,6 @@
 
   root.style.display='none';
 })();
-  };
 
   window.startTrafficJam();
 })();
