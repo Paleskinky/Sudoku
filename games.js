@@ -1,14 +1,26 @@
 
 (() => {
-  const old = document.querySelector("#puzzle-club");
-  const oldStyle = document.querySelector("#mindless-style");
-  const oldBack = document.querySelector("#mindless-back");
-  if (old) old.remove();
-  if (oldStyle) oldStyle.remove();
-  if (oldBack) oldBack.remove();
+  "use strict";
+
+  // Удаляем предыдущую версию меню, если она уже была загружена.
+  document.querySelector("#puzzle-club")?.remove();
+  document.querySelector("#mindless-style")?.remove();
+  document.querySelector("#mindless-back")?.remove();
+
+  const sudoku = document.querySelector(".app");
+
+  if (!sudoku) {
+    console.error("Mindless: Sudoku container .app not found");
+    return;
+  }
+
+  // --------------------------------------------------
+  // ОСНОВНЫЕ СТИЛИ
+  // --------------------------------------------------
 
   const css = document.createElement("style");
   css.id = "mindless-style";
+
   css.textContent = `
     #puzzle-club {
       position: fixed;
@@ -21,7 +33,9 @@
       padding: max(30px, env(safe-area-inset-top)) 20px 40px;
     }
 
-    #puzzle-club * { box-sizing: border-box; }
+    #puzzle-club * {
+      box-sizing: border-box;
+    }
 
     .ml-header {
       display: flex;
@@ -276,17 +290,32 @@
       font-weight: 600;
     }
 
-    .ml-card[hidden] { display: none !important; }
+    .ml-card[hidden] {
+      display: none !important;
+    }
+
+    @media (max-width: 360px) {
+      #puzzle-club {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .ml-card-name {
+        font-size: 15px;
+      }
+
+      .ml-art {
+        width: 66px;
+        height: 66px;
+      }
+    }
   `;
 
   document.head.appendChild(css);
 
-  const sudoku = document.querySelector(".app");
-
-  if (!sudoku) {
-    console.error("Mindless: Sudoku container .app not found");
-    return;
-  }
+  // --------------------------------------------------
+  // ИКОНКИ ИГР
+  // --------------------------------------------------
 
   const icons = {
     sudoku: `
@@ -378,6 +407,10 @@
     `
   };
 
+  // --------------------------------------------------
+  // СОЗДАНИЕ МЕНЮ
+  // --------------------------------------------------
+
   const menu = document.createElement("div");
   menu.id = "puzzle-club";
 
@@ -397,6 +430,7 @@
     </header>
 
     <div class="ml-grid">
+
       <button class="ml-card" data-game="sudoku">
         <span class="ml-art">${icons.sudoku}</span>
         <span class="ml-card-name">Sudoku</span>
@@ -409,13 +443,14 @@
 
       <button class="ml-card" data-game="bus">
         <span class="ml-art">${icons.bus}</span>
-        <span class="ml-card-name">Bus Jam</span>
+        <span class="ml-card-name">Traffic & Bus Jam</span>
       </button>
 
       <button class="ml-card" data-game="screw">
         <span class="ml-art">${icons.screw}</span>
         <span class="ml-card-name">Screw Puzzle</span>
       </button>
+
     </div>
 
     <div class="ml-overlay" id="ml-overlay">
@@ -428,6 +463,7 @@
 
     <div class="ml-settings-overlay" id="ml-settings-overlay">
       <section class="ml-settings-panel">
+
         <h2>Настройки</h2>
         <p>Настрой Mindless под себя. Настройки самих игр остаются независимыми.</p>
 
@@ -435,23 +471,30 @@
         <div class="ml-palette-list" id="ml-palette-list"></div>
 
         <label class="ml-setting-row">
-          <span>Анимация нажатий<small>Мягкая реакция карточек</small></span>
+          <span>
+            Анимация нажатий
+            <small>Мягкая реакция карточек</small>
+          </span>
           <input type="checkbox" id="ml-animations">
         </label>
 
         <div class="ml-settings-title">МОЯ КОЛЛЕКЦИЯ</div>
+
         <label class="ml-setting-row">
           <span>Sudoku</span>
           <input type="checkbox" data-game-visible="sudoku">
         </label>
+
         <label class="ml-setting-row">
           <span>Triple Match</span>
           <input type="checkbox" data-game-visible="triple">
         </label>
+
         <label class="ml-setting-row">
-          <span>Bus Jam</span>
+          <span>Traffic & Bus Jam</span>
           <input type="checkbox" data-game-visible="bus">
         </label>
+
         <label class="ml-setting-row">
           <span>Screw Puzzle</span>
           <input type="checkbox" data-game-visible="screw">
@@ -460,31 +503,91 @@
         <div class="ml-settings-actions">
           <button type="button" id="ml-settings-close">Готово</button>
         </div>
+
       </section>
     </div>
   `;
 
   document.body.appendChild(menu);
 
+  // --------------------------------------------------
+  // ОБЩАЯ КНОПКА ВОЗВРАТА
+  // --------------------------------------------------
+
   const back = document.createElement("button");
   back.className = "ml-back";
   back.textContent = "← Mindless";
   back.id = "mindless-back";
+
   document.body.appendChild(back);
+
+  // --------------------------------------------------
+  // ПЕРЕКЛЮЧЕНИЕ МЕЖДУ РАЗДЕЛАМИ
+  // --------------------------------------------------
+
+  function hideTraffic() {
+    const traffic = document.getElementById("traffic-game");
+
+    if (traffic) {
+      traffic.style.display = "none";
+    }
+  }
 
   function openMenu() {
     menu.style.display = "block";
     sudoku.style.display = "none";
+    hideTraffic();
+
     back.style.display = "none";
   }
 
   function openSudoku() {
     menu.style.display = "none";
     sudoku.style.display = "";
+    hideTraffic();
+
     back.style.display = "block";
   }
 
+  function openTraffic() {
+    const start = window.startTrafficJam;
+
+    if (typeof start !== "function") {
+      console.error("Mindless: traffic-jam.js is not loaded");
+      openMenu();
+      return;
+    }
+
+    menu.style.display = "none";
+    sudoku.style.display = "none";
+    back.style.display = "block";
+
+    start();
+  }
+
+  function openTriple() {
+    const start = window.startTripleMatch;
+
+    if (typeof start !== "function") {
+      console.error("Mindless: triple-match.js is not loaded");
+      openMenu();
+      return;
+    }
+
+    menu.style.display = "none";
+    sudoku.style.display = "none";
+    hideTraffic();
+
+    back.style.display = "block";
+
+    start();
+  }
+
   back.addEventListener("click", openMenu);
+
+  // --------------------------------------------------
+  // ПАЛИТРЫ
+  // --------------------------------------------------
 
   const mindlessPalettes = {
     paper: {
@@ -495,6 +598,7 @@
       line: "#DAD8D0",
       accent: "#818777"
     },
+
     sage: {
       name: "Шалфей",
       bg: "#F0F2EC",
@@ -503,6 +607,7 @@
       line: "#D7DDD2",
       accent: "#75836F"
     },
+
     sand: {
       name: "Песочная",
       bg: "#F4F0E9",
@@ -511,6 +616,7 @@
       line: "#E1D8CB",
       accent: "#927D62"
     },
+
     graphite: {
       name: "Графит",
       bg: "#ECEDEB",
@@ -521,9 +627,14 @@
     }
   };
 
+  // --------------------------------------------------
+  // СОХРАНЯЕМЫЕ НАСТРОЙКИ
+  // --------------------------------------------------
+
   const defaultMindlessSettings = {
     palette: "paper",
     animations: true,
+
     games: {
       sudoku: true,
       triple: true,
@@ -532,22 +643,31 @@
     }
   };
 
-  let mindlessSettings = {...defaultMindlessSettings};
+  let mindlessSettings = {
+    ...defaultMindlessSettings,
+    games: { ...defaultMindlessSettings.games }
+  };
 
   function loadMindlessSettings() {
     try {
-      const saved = JSON.parse(localStorage.getItem("mindless-settings"));
+      const saved = JSON.parse(
+        localStorage.getItem("mindless-settings")
+      );
+
       if (saved) {
         mindlessSettings = {
           ...defaultMindlessSettings,
           ...saved,
+
           games: {
             ...defaultMindlessSettings.games,
             ...(saved.games || {})
           }
         };
       }
-    } catch (e) {}
+    } catch (error) {
+      console.warn("Mindless settings could not be loaded", error);
+    }
 
     if (!mindlessPalettes[mindlessSettings.palette]) {
       mindlessSettings.palette = "paper";
@@ -564,14 +684,21 @@
         "mindless-settings",
         JSON.stringify(mindlessSettings)
       );
-    } catch (e) {}
+    } catch (error) {
+      console.warn("Mindless settings could not be saved", error);
+    }
   }
+
+  // --------------------------------------------------
+  // ПРИМЕНЕНИЕ ПАЛИТРЫ
+  // --------------------------------------------------
 
   function applyMindlessPalette() {
     const p = mindlessPalettes[mindlessSettings.palette];
 
     menu.style.background = p.bg;
     menu.style.color = p.ink;
+
     menu.querySelector(".ml-logo").style.color = p.ink;
 
     menu.querySelectorAll(".ml-card").forEach(card => {
@@ -581,6 +708,7 @@
     });
 
     const settingsButton = menu.querySelector(".ml-settings");
+
     settingsButton.style.background = p.card;
     settingsButton.style.color = p.accent;
     settingsButton.style.borderColor = p.line;
@@ -590,6 +718,7 @@
     back.style.borderColor = p.line;
 
     const panel = menu.querySelector(".ml-settings-panel");
+
     panel.style.background = p.card;
     panel.style.color = p.ink;
     panel.style.borderColor = p.line;
@@ -605,16 +734,25 @@
     });
 
     const closeButton = menu.querySelector("#ml-settings-close");
+
     closeButton.style.background = p.bg;
     closeButton.style.color = p.ink;
     closeButton.style.borderColor = p.line;
   }
+
+  // --------------------------------------------------
+  // ВИДИМОСТЬ ИГР
+  // --------------------------------------------------
 
   function applyGameVisibility() {
     menu.querySelectorAll("[data-game]").forEach(card => {
       card.hidden = !mindlessSettings.games[card.dataset.game];
     });
   }
+
+  // --------------------------------------------------
+  // АНИМАЦИИ
+  // --------------------------------------------------
 
   function applyAnimationPreference() {
     menu.querySelectorAll(".ml-card").forEach(card => {
@@ -624,28 +762,40 @@
     });
   }
 
+  // --------------------------------------------------
+  // ОТРИСОВКА НАСТРОЕК
+  // --------------------------------------------------
+
   function renderMindlessSettings() {
     const paletteBox = menu.querySelector("#ml-palette-list");
+
     paletteBox.innerHTML = "";
 
     Object.entries(mindlessPalettes).forEach(([key, p]) => {
       const button = document.createElement("button");
 
       button.type = "button";
-      button.className = "ml-palette" +
+
+      button.className =
+        "ml-palette" +
         (mindlessSettings.palette === key ? " active" : "");
 
       button.innerHTML =
         '<div class="ml-swatches">' +
         [p.bg, p.card, p.accent].map(color =>
-          '<span class="ml-swatch" style="background:' + color + '"></span>'
+          '<span class="ml-swatch" style="background:' +
+          color +
+          '"></span>'
         ).join("") +
-        '</div>' + p.name;
+        "</div>" +
+        p.name;
 
       button.addEventListener("click", () => {
         mindlessSettings.palette = key;
+
         applyMindlessPalette();
         renderMindlessSettings();
+        saveMindlessSettings();
       });
 
       paletteBox.appendChild(button);
@@ -655,77 +805,129 @@
       mindlessSettings.animations;
 
     menu.querySelectorAll("[data-game-visible]").forEach(input => {
-      input.checked = mindlessSettings.games[input.dataset.gameVisible];
+      input.checked =
+        mindlessSettings.games[input.dataset.gameVisible];
     });
   }
 
   function openMindlessSettings() {
     renderMindlessSettings();
+
     menu.querySelector("#ml-settings-overlay").style.display = "flex";
   }
 
   function closeMindlessSettings() {
     menu.querySelector("#ml-settings-overlay").style.display = "none";
+
     saveMindlessSettings();
   }
 
+  // --------------------------------------------------
+  // ОБРАБОТЧИКИ НАСТРОЕК
+  // --------------------------------------------------
+
   menu.querySelector(".ml-settings").addEventListener(
-    "click", openMindlessSettings
+    "click",
+    openMindlessSettings
   );
 
   menu.querySelector("#ml-settings-close").addEventListener(
-    "click", closeMindlessSettings
+    "click",
+    closeMindlessSettings
   );
 
-  menu.querySelector("#ml-settings-overlay").addEventListener("click", event => {
-    if (event.target.id === "ml-settings-overlay") {
-      closeMindlessSettings();
+  menu.querySelector("#ml-settings-overlay").addEventListener(
+    "click",
+    event => {
+      if (event.target.id === "ml-settings-overlay") {
+        closeMindlessSettings();
+      }
     }
-  });
+  );
 
-  menu.querySelector("#ml-animations").addEventListener("change", event => {
-    mindlessSettings.animations = event.target.checked;
-    applyAnimationPreference();
-    saveMindlessSettings();
-  });
+  menu.querySelector("#ml-animations").addEventListener(
+    "change",
+    event => {
+      mindlessSettings.animations = event.target.checked;
+
+      applyAnimationPreference();
+      saveMindlessSettings();
+    }
+  );
 
   menu.querySelectorAll("[data-game-visible]").forEach(input => {
     input.addEventListener("change", event => {
       const game = event.target.dataset.gameVisible;
+
       mindlessSettings.games[game] = event.target.checked;
+
       applyGameVisibility();
       saveMindlessSettings();
     });
   });
 
+  // --------------------------------------------------
+  // ЗАПУСК ИГР
+  // --------------------------------------------------
+
   menu.querySelectorAll("[data-game]").forEach(card => {
     card.addEventListener("click", () => {
-      if (card.dataset.game === "sudoku") {
-        openSudoku();
-        return;
+      const game = card.dataset.game;
+
+      switch (game) {
+        case "sudoku":
+          openSudoku();
+          break;
+
+        case "triple":
+          openTriple();
+          break;
+
+        case "bus":
+          openTraffic();
+          break;
+
+        case "screw":
+          menu.querySelector("#ml-dialog-title").textContent =
+            "Screw Puzzle";
+
+          menu.querySelector("#ml-dialog-text").textContent =
+            "Эта игра скоро появится в Mindless.";
+
+          menu.querySelector("#ml-overlay").style.display = "flex";
+          break;
+
+        default:
+          console.warn("Mindless: unknown game", game);
       }
-if (card.dataset.game === "triple") {
-  window.startTripleMatch();
-  return;
-}
-      const names = {
-        triple: "Triple Match",
-        bus: "Bus Jam",
-        screw: "Screw Puzzle"
-      };
-
-      menu.querySelector("#ml-dialog-title").textContent =
-        names[card.dataset.game];
-
-      menu.querySelector("#ml-overlay").style.display = "flex";
     });
   });
 
-  menu.querySelector("#ml-dialog-close")
-    .addEventListener("click", () => {
+  // --------------------------------------------------
+  // ОКНО COMING SOON
+  // --------------------------------------------------
+
+  menu.querySelector("#ml-dialog-close").addEventListener(
+    "click",
+    () => {
       menu.querySelector("#ml-overlay").style.display = "none";
-    });
+    }
+  );
+
+  menu.querySelector("#ml-overlay").addEventListener(
+    "click",
+    event => {
+      if (event.target.id === "ml-overlay") {
+        menu.querySelector("#ml-overlay").style.display = "none";
+      }
+    }
+  );
+
+  // --------------------------------------------------
+  // ЗАПУСК MINDLESS
+  // --------------------------------------------------
 
   loadMindlessSettings();
   openMenu();
+
 })();
