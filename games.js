@@ -44,8 +44,18 @@
       border: 1px solid #DAD8D0;
       border-radius: 50%;
       background: #FAF9F6;
-      color: #77796F;
-      font-size: 19px;
+      color: #818777;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ml-settings:active {
+      transform: scale(.96);
+      background: #F0EFEA;
     }
 
     .ml-grid {
@@ -252,7 +262,16 @@
   menu.innerHTML = `
     <header class="ml-header">
       <div class="ml-logo">Mindless.</div>
-      <button class="ml-settings" aria-label="Settings">⚙</button>
+
+      <button class="ml-settings" aria-label="Settings">
+        <svg viewBox="0 0 24 24" width="21" height="21"
+          fill="none" stroke="currentColor" stroke-width="1.7"
+          stroke-linecap="round" stroke-linejoin="round"
+          aria-hidden="true">
+          <path d="M10 2.8h4l.55 2.35a7.4 7.4 0 0 1 1.65.96l2.3-.7 2 3.46-1.75 1.65a7.7 7.7 0 0 1 0 1.92l1.75 1.65-2 3.46-2.3-.7a7.4 7.4 0 0 1-1.65.96L14 20.2h-4l-.55-2.35a7.4 7.4 0 0 1-1.65-.96l-2.3.7-2-3.46 1.75-1.65a7.7 7.7 0 0 1 0-1.92L3.5 8.91l2-3.46 2.3.7a7.4 7.4 0 0 1 1.65-.96L10 2.8Z"/>
+          <circle cx="12" cy="11.95" r="3.05"/>
+        </svg>
+      </button>
     </header>
 
     <div class="ml-grid">
