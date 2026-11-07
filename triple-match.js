@@ -1,6 +1,5 @@
 
 (() => {
-  // Удаляем предыдущую версию игры
   document.getElementById("triple-game")?.remove();
   document.getElementById("tm-style")?.remove();
 
@@ -82,7 +81,7 @@
     .tm-difficulty {
       display:flex;
       gap:7px;
-      margin-bottom:12px;
+      margin-bottom:8px;
     }
 
     .tm-difficulty button,
@@ -116,30 +115,23 @@
 
     .tm-stages-section {
       display:none;
-      margin-bottom:10px;
+      margin-bottom:7px;
     }
 
     .tm-stages-section.visible {
       display:block;
     }
 
-    .tm-stages-heading {
-      color:#898A80;
-      font-size:10px;
-      letter-spacing:.12em;
-      margin:14px 0 8px;
-    }
-
     .tm-stages {
       display:flex;
       gap:6px;
-      padding:2px 0 8px;
+      padding:2px 0 5px;
     }
 
     .tm-stages button {
       flex:1;
       min-width:0;
-      padding:10px 4px;
+      padding:9px 4px;
       font-size:12px;
     }
 
@@ -184,6 +176,12 @@
       isolation:isolate;
     }
 
+    /*
+      Объём карточки находится ВНУТРИ её размеров.
+      Внешние тени и увеличение размеров отключены.
+      Поэтому карточки не двигают игровое поле.
+    */
+
     .tm-tile {
       position:absolute;
       width:14.1%;
@@ -191,23 +189,30 @@
       padding:0;
       border:1px solid #D8D5CC;
       border-radius:11px;
-      background:linear-gradient(
-        145deg,
-        #FFFFFF 0%,
-        #FCFBF8 65%,
-        #F1EFE8 100%
-      );
+
+      background:
+        linear-gradient(
+          155deg,
+          #FFFFFF 0%,
+          #FCFBF8 42%,
+          #F3F1EA 100%
+        );
+
       display:flex;
       align-items:center;
       justify-content:center;
+
       font-size:clamp(19px,6vw,29px);
       font-weight:500;
+
       box-shadow:
-        0 3px 0 #D8D5CC,
-        0 5px 9px #5D594D20,
-        inset 0 1px 1px #FFFFFF;
+        inset 0 2px 0 #FFFFFF,
+        inset 0 -3px 0 #D8D5CC,
+        inset 1px 0 0 #FFFFFF80,
+        inset -1px 0 0 #E7E4DC;
+
       -webkit-tap-highlight-color:transparent;
-      transition:transform .12s,opacity .12s,filter .12s;
+      transition:opacity .12s,filter .12s;
     }
 
     .tm-tile:before {
@@ -215,23 +220,29 @@
       position:absolute;
       left:12%;
       right:12%;
-      top:3%;
+      top:5%;
       height:18%;
       border-radius:20px;
-      background:linear-gradient(180deg,#FFFFFF90,transparent);
+      background:linear-gradient(
+        180deg,
+        #FFFFFFB0,
+        #FFFFFF00
+      );
       pointer-events:none;
     }
 
     .tm-tile:active:not(:disabled) {
-      transform:scale(.94);
+      filter:brightness(.96);
     }
 
     .tm-tile.blocked {
       filter:grayscale(.65);
       opacity:.72;
+
       box-shadow:
-        0 2px 0 #D8D5CC,
-        0 3px 5px #5D594D12;
+        inset 0 1px 0 #FFFFFF80,
+        inset 0 -2px 0 #D8D5CC,
+        inset 0 0 8px #5D594D12;
     }
 
     .tm-tile.blocked:after {
@@ -239,7 +250,11 @@
       position:absolute;
       inset:0;
       border-radius:10px;
-      background:linear-gradient(135deg,#6C6B6320,#6C6B6308);
+      background:linear-gradient(
+        135deg,
+        #6C6B6320,
+        #6C6B6308
+      );
     }
 
     .tm-tile:disabled {
@@ -374,8 +389,6 @@
     </div>
 
     <div class="tm-stages-section" id="tm-stages-section">
-      <div class="tm-stages-heading">СЛОИ</div>
-
       <div class="tm-stages" id="tm-stages">
         <button data-stage="5">5</button>
         <button data-stage="6">6</button>
@@ -597,8 +610,8 @@
     return tiles.some(other =>
       !other.gone &&
       other.layer > tile.layer &&
-      Math.abs(other.x-tile.x) < 1 &&
-      Math.abs(other.y-tile.y) < 1
+      other.x === tile.x &&
+      other.y === tile.y
     );
   }
 
@@ -618,13 +631,12 @@
       el.textContent = symbols[tile.type][0];
       el.style.color = symbols[tile.type][1];
 
-      el.style.left =
-        (tile.x*14.2857+tile.layer*0.45)+"%";
+      // Фиксированные координаты без смещения по слоям.
+      // Все карточки остаются внутри одной и той же сетки.
+      el.style.left = (tile.x * 14.2857) + "%";
+      el.style.top = (tile.y * 14.2857) + "%";
 
-      el.style.top =
-        (tile.y*14.2857-tile.layer*0.45)+"%";
-
-      el.style.zIndex = String(20+tile.layer);
+      el.style.zIndex = String(20 + tile.layer);
       el.disabled = blocked || locked;
 
       el.setAttribute(
