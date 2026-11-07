@@ -612,6 +612,3 @@
 
   root.style.display='none';
 })();
-
-  window.startTrafficJam();
-})();
