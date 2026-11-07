@@ -1,10 +1,8 @@
 
 (() => {
-  const oldGame = document.getElementById("triple-game");
-  if (oldGame) oldGame.remove();
-
-  const oldStyle = document.getElementById("tm-style");
-  if (oldStyle) oldStyle.remove();
+  // Удаляем предыдущую версию игры
+  document.getElementById("triple-game")?.remove();
+  document.getElementById("tm-style")?.remove();
 
   const symbols = [
     ["●", "#D78F83"], ["◆", "#9B9BB8"], ["▲", "#91A58A"], ["✿", "#D5AC72"],
@@ -13,89 +11,201 @@
 
   const style = document.createElement("style");
   style.id = "tm-style";
+
   style.textContent = `
     #triple-game {
-      position:fixed; inset:0; z-index:10000; overflow-y:auto;
+      position:fixed;
+      inset:0;
+      z-index:10000;
+      overflow-y:auto;
       padding:max(65px,env(safe-area-inset-top) + 45px) 16px 35px;
-      background:#F5F4F0; color:#34352F; font-family:inherit;
-    }
-    #triple-game * { box-sizing:border-box; }
-    .tm-top { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:17px; }
-    .tm-top h2 { font-size:25px; margin:0; letter-spacing:-1px; }
-    .tm-sub { color:#898A80; font-size:12px; margin-top:4px; }
-    .tm-restart,.tm-controls button {
-      border:1px solid #DAD8D0; border-radius:20px; background:#FAF9F6;
-      padding:10px 14px; color:#34352F; font:inherit; font-size:12px;
+      background:#F5F4F0;
+      color:#34352F;
+      font-family:inherit;
     }
 
-    .tm-mode-title,.tm-tray-title {
-      color:#898A80; font-size:10px; letter-spacing:.08em; margin:14px 0 8px;
+    #triple-game * { box-sizing:border-box; }
+
+    .tm-top {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:17px;
+    }
+
+    .tm-top h2 {
+      font-size:25px;
+      margin:0;
+      letter-spacing:-1px;
+    }
+
+    .tm-sub {
+      color:#898A80;
+      font-size:12px;
+      margin-top:4px;
+    }
+
+    .tm-top-actions {
+      display:flex;
+      align-items:center;
+      gap:6px;
+      flex-shrink:0;
+    }
+
+    .tm-restart,
+    .tm-exit,
+    .tm-controls button {
+      border:1px solid #DAD8D0;
+      border-radius:20px;
+      background:#FAF9F6;
+      padding:10px 12px;
+      color:#34352F;
+      font:inherit;
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    .tm-exit {
+      color:#898A80;
+      background:transparent;
+    }
+
+    .tm-mode-title,
+    .tm-tray-title {
+      color:#898A80;
+      font-size:10px;
+      letter-spacing:.08em;
+      margin:14px 0 8px;
     }
 
     .tm-difficulty {
-      display:flex; gap:7px; margin-bottom:15px;
+      display:flex;
+      gap:7px;
+      margin-bottom:12px;
     }
 
-    .tm-difficulty button,.tm-stages button {
-      border:1px solid #DAD8D0; border-radius:18px; background:#FAF9F6;
-      color:#77796F; padding:9px 5px; font:inherit; font-size:11px;
+    .tm-difficulty button,
+    .tm-stages button {
+      border:1px solid #DAD8D0;
+      border-radius:18px;
+      background:#FAF9F6;
+      color:#77796F;
+      padding:10px 5px;
+      font:inherit;
+      font-size:11px;
       transition:background .15s,border-color .15s,transform .15s;
     }
 
-    .tm-difficulty button { flex:1; }
+    .tm-difficulty button {
+      flex:1;
+    }
 
-    .tm-difficulty button.active,.tm-stages button.active {
-      background:#E8E9E1; color:#34352F; border-color:#A6AA9B;
+    .tm-difficulty button.active,
+    .tm-stages button.active {
+      background:#E8E9E1;
+      color:#34352F;
+      border-color:#A6AA9B;
       box-shadow:inset 0 1px 2px #FFFFFF90;
     }
 
-    .tm-difficulty button:active,.tm-stages button:active {
+    .tm-difficulty button:active,
+    .tm-stages button:active {
       transform:scale(.96);
+    }
+
+    .tm-stages-section {
+      display:none;
+      margin-bottom:10px;
+    }
+
+    .tm-stages-section.visible {
+      display:block;
     }
 
     .tm-stages-heading {
       color:#898A80;
       font-size:10px;
       letter-spacing:.12em;
-      margin:17px 0 7px;
+      margin:14px 0 8px;
     }
 
     .tm-stages {
-      display:none;
+      display:flex;
       gap:6px;
-      overflow-x:auto;
-      padding:2px 0 10px;
-      scrollbar-width:none;
+      padding:2px 0 8px;
     }
 
-    .tm-stages::-webkit-scrollbar { display:none; }
-    .tm-stages.visible { display:flex; }
-
     .tm-stages button {
-      flex:1 0 0;
+      flex:1;
       min-width:0;
-      padding:10px 5px;
+      padding:10px 4px;
       font-size:12px;
     }
 
-    .tm-status { display:flex; justify-content:space-between; color:#85867D; font-size:11px; margin:9px 2px; }
-    .tm-progress { height:5px; background:#E4E2DB; border-radius:9px; overflow:hidden; margin:10px 0 16px; }
-    .tm-progress span { display:block; height:100%; width:0; background:#89927F; transition:width .2s ease; }
+    .tm-status {
+      display:flex;
+      justify-content:space-between;
+      color:#85867D;
+      font-size:11px;
+      margin:9px 2px;
+    }
 
-    .tm-board-wrap { width:min(100%,410px); margin:0 auto 18px; }
+    .tm-progress {
+      height:5px;
+      background:#E4E2DB;
+      border-radius:9px;
+      overflow:hidden;
+      margin:10px 0 16px;
+    }
+
+    .tm-progress span {
+      display:block;
+      height:100%;
+      width:0;
+      background:#89927F;
+      transition:width .2s ease;
+    }
+
+    .tm-board-wrap {
+      width:min(100%,410px);
+      margin:0 auto 18px;
+    }
+
     .tm-board {
-      position:relative; width:100%; aspect-ratio:1; max-height:410px;
-      border-radius:20px; background:#EEEDE7; border:1px solid #E1DFD7;
-      overflow:hidden; isolation:isolate;
+      position:relative;
+      width:100%;
+      aspect-ratio:1;
+      max-height:410px;
+      border-radius:20px;
+      background:#EEEDE7;
+      border:1px solid #E1DFD7;
+      overflow:hidden;
+      isolation:isolate;
     }
 
     .tm-tile {
-      position:absolute; width:14.1%; height:14.1%; padding:0;
-      border:1px solid #D8D5CC; border-radius:11px;
-      background:linear-gradient(145deg,#FFFFFF 0%,#FCFBF8 65%,#F1EFE8 100%);
-      display:flex; align-items:center; justify-content:center;
-      font-size:clamp(19px,6vw,29px); font-weight:500;
-      box-shadow:0 3px 0 #D8D5CC,0 5px 9px #5D594D20,inset 0 1px 1px #FFFFFF;
+      position:absolute;
+      width:14.1%;
+      height:14.1%;
+      padding:0;
+      border:1px solid #D8D5CC;
+      border-radius:11px;
+      background:linear-gradient(
+        145deg,
+        #FFFFFF 0%,
+        #FCFBF8 65%,
+        #F1EFE8 100%
+      );
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:clamp(19px,6vw,29px);
+      font-weight:500;
+      box-shadow:
+        0 3px 0 #D8D5CC,
+        0 5px 9px #5D594D20,
+        inset 0 1px 1px #FFFFFF;
       -webkit-tap-highlight-color:transparent;
       transition:transform .12s,opacity .12s,filter .12s;
     }
@@ -103,19 +213,25 @@
     .tm-tile:before {
       content:'';
       position:absolute;
-      left:12%;right:12%;top:3%;
+      left:12%;
+      right:12%;
+      top:3%;
       height:18%;
       border-radius:20px;
       background:linear-gradient(180deg,#FFFFFF90,transparent);
       pointer-events:none;
     }
 
-    .tm-tile:active:not(:disabled) { transform:scale(.94); }
+    .tm-tile:active:not(:disabled) {
+      transform:scale(.94);
+    }
 
     .tm-tile.blocked {
       filter:grayscale(.65);
       opacity:.72;
-      box-shadow:0 2px 0 #D8D5CC,0 3px 5px #5D594D12;
+      box-shadow:
+        0 2px 0 #D8D5CC,
+        0 3px 5px #5D594D12;
     }
 
     .tm-tile.blocked:after {
@@ -126,41 +242,107 @@
       background:linear-gradient(135deg,#6C6B6320,#6C6B6308);
     }
 
-    .tm-tile:disabled { cursor:default; }
+    .tm-tile:disabled {
+      cursor:default;
+    }
 
-    .tm-tray-title { margin-top:14px; }
+    .tm-tray-title {
+      margin-top:14px;
+    }
+
     .tm-tray {
-      display:grid; grid-template-columns:repeat(7,minmax(0,1fr));
-      gap:6px; padding:9px; border:1px solid #DAD8D0;
-      border-radius:17px; background:#EFEEE9; min-height:62px;
-    }
-    .tm-slot {
-      aspect-ratio:1; border-radius:9px; background:#FAF9F6;
-      display:flex; align-items:center; justify-content:center;
-      font-size:clamp(17px,5vw,23px); min-width:0;
+      display:grid;
+      grid-template-columns:repeat(7,minmax(0,1fr));
+      gap:6px;
+      padding:9px;
+      border:1px solid #DAD8D0;
+      border-radius:17px;
+      background:#EFEEE9;
+      min-height:62px;
     }
 
-    .tm-message { text-align:center; color:#818777; font-size:12px; min-height:18px; margin:12px 0; }
-    .tm-controls { display:flex; justify-content:center; gap:9px; margin-top:14px; }
+    .tm-slot {
+      aspect-ratio:1;
+      border-radius:9px;
+      background:#FAF9F6;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:clamp(17px,5vw,23px);
+      min-width:0;
+    }
+
+    .tm-message {
+      text-align:center;
+      color:#818777;
+      font-size:12px;
+      min-height:18px;
+      margin:12px 0;
+    }
+
+    .tm-controls {
+      display:flex;
+      justify-content:center;
+      gap:9px;
+      margin-top:14px;
+    }
 
     .tm-result {
-      position:fixed; inset:0; z-index:10005; background:#34352F66;
-      display:none; align-items:center; justify-content:center; padding:24px;
+      position:fixed;
+      inset:0;
+      z-index:10005;
+      background:#34352F66;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
     }
+
     .tm-result-box {
-      width:100%; max-width:300px; padding:28px; border-radius:23px;
-      background:#FAF9F6; text-align:center; box-shadow:0 12px 40px #0002;
+      width:100%;
+      max-width:300px;
+      padding:28px;
+      border-radius:23px;
+      background:#FAF9F6;
+      text-align:center;
+      box-shadow:0 12px 40px #0002;
     }
-    .tm-result-box h3 { margin:0 0 8px; }
-    .tm-result-box p { color:#898A80; font-size:13px; line-height:1.5; }
+
+    .tm-result-box h3 {
+      margin:0 0 8px;
+    }
+
+    .tm-result-box p {
+      color:#898A80;
+      font-size:13px;
+      line-height:1.5;
+    }
+
     .tm-result-box button {
-      border:0; border-radius:20px; padding:12px 22px;
-      background:#E8E9E1; color:#34352F; font:inherit; margin-top:10px;
+      border:0;
+      border-radius:20px;
+      padding:12px 22px;
+      background:#E8E9E1;
+      color:#34352F;
+      font:inherit;
+      margin-top:10px;
     }
 
     @media(max-width:360px) {
-      #triple-game { padding-left:11px; padding-right:11px; }
-      .tm-tile { border-radius:8px; }
+      #triple-game {
+        padding-left:11px;
+        padding-right:11px;
+      }
+
+      .tm-tile {
+        border-radius:8px;
+      }
+
+      .tm-restart,
+      .tm-exit {
+        padding:9px 10px;
+        font-size:11px;
+      }
     }
   `;
 
@@ -176,7 +358,11 @@
         <h2>Triple Match</h2>
         <div class="tm-sub">Разбирай слои и собирай тройки</div>
       </div>
-      <button class="tm-restart" id="tm-restart">↻ Заново</button>
+
+      <div class="tm-top-actions">
+        <button class="tm-restart" id="tm-restart">↻ Заново</button>
+        <button class="tm-exit" id="tm-exit">Выйти</button>
+      </div>
     </div>
 
     <div class="tm-mode-title">РЕЖИМ</div>
@@ -184,33 +370,44 @@
     <div class="tm-difficulty">
       <button data-mode="easy">Легко</button>
       <button data-mode="normal" class="active">Средне</button>
+      <button data-mode="hard">Хард</button>
     </div>
 
-    <div class="tm-stages-heading">СЛОИ</div>
+    <div class="tm-stages-section" id="tm-stages-section">
+      <div class="tm-stages-heading">СЛОИ</div>
 
-    <div class="tm-stages" id="tm-stages">
-      <button data-stage="5">5</button>
-      <button data-stage="6">6</button>
-      <button data-stage="7">7</button>
-      <button data-stage="8">8</button>
-      <button data-stage="9">9</button>
-      <button data-stage="10" class="active">10</button>
+      <div class="tm-stages" id="tm-stages">
+        <button data-stage="5">5</button>
+        <button data-stage="6">6</button>
+        <button data-stage="7">7</button>
+        <button data-stage="8">8</button>
+        <button data-stage="9">9</button>
+        <button data-stage="10">10</button>
+      </div>
     </div>
 
     <div class="tm-status">
       <span id="tm-level-label">Уровень 1</span>
-      <span id="tm-layer-label">Слоёв: 4</span>
+      <span id="tm-layer-label"></span>
     </div>
 
-    <div class="tm-progress"><span id="tm-progress"></span></div>
+    <div class="tm-progress">
+      <span id="tm-progress"></span>
+    </div>
 
     <div class="tm-board-wrap">
       <div class="tm-board" id="tm-board"></div>
     </div>
 
-    <div class="tm-tray-title">ТВОЯ ПАНЕЛЬ · <span id="tm-count">0/7</span></div>
+    <div class="tm-tray-title">
+      ТВОЯ ПАНЕЛЬ · <span id="tm-count">0/7</span>
+    </div>
+
     <div class="tm-tray" id="tm-tray"></div>
-    <div class="tm-message" id="tm-message">Сначала открывай верхние карточки</div>
+
+    <div class="tm-message" id="tm-message">
+      Сначала открывай верхние карточки
+    </div>
 
     <div class="tm-controls">
       <button id="tm-undo">Отменить ход</button>
@@ -231,7 +428,7 @@
   const $ = id => game.querySelector("#" + id);
 
   let mode = "normal";
-  let hardStage = 10;
+  let hardStage = 5;
   let levelNumber = 1;
   let tiles = [];
   let tray = [];
@@ -254,31 +451,38 @@
     const cells = [];
 
     for (let y = 0; y < 7; y++) {
-      for (let x = 0; x < 7; x++) cells.push({x,y});
+      for (let x = 0; x < 7; x++) {
+        cells.push({x,y});
+      }
     }
 
-    const center = p => Math.abs(p.x - 3) + Math.abs(p.y - 3);
+    const center = p =>
+      Math.abs(p.x - 3) + Math.abs(p.y - 3);
 
     if (shape === "pyramid") {
       cells.sort((a,b) =>
         center(a)-center(b) ||
         ((a.x+a.y+variant)%2)-((b.x+b.y+variant)%2)
       );
+
     } else if (shape === "checker") {
       cells.sort((a,b) =>
         ((a.x+a.y+variant)%2)-((b.x+b.y+variant)%2) ||
         center(a)-center(b)
       );
+
     } else if (shape === "ring") {
       cells.sort((a,b) =>
         Math.max(Math.abs(b.x-3),Math.abs(b.y-3)) -
         Math.max(Math.abs(a.x-3),Math.abs(a.y-3)) ||
         Math.atan2(a.y-3,a.x-3)-Math.atan2(b.y-3,b.x-3)
       );
+
     } else if (shape === "maze") {
       cells.sort((a,b) =>
         ((a.y+variant)%2) ? b.x-a.x : a.x-b.x
       );
+
     } else {
       cells.sort((a,b) =>
         Math.abs(a.x-3)-Math.abs(b.x-3) ||
@@ -293,6 +497,28 @@
     return selected;
   }
 
+  function updateModeButtons() {
+    game.querySelectorAll("[data-mode]").forEach(button => {
+      button.classList.toggle(
+        "active",
+        button.dataset.mode === mode
+      );
+    });
+
+    game.querySelectorAll("[data-stage]").forEach(button => {
+      button.classList.toggle(
+        "active",
+        mode === "hard" &&
+        Number(button.dataset.stage) === hardStage
+      );
+    });
+
+    $("tm-stages-section").classList.toggle(
+      "visible",
+      mode === "hard"
+    );
+  }
+
   function makeLevel() {
     let layerCount;
 
@@ -304,7 +530,10 @@
       layerCount = 4 + ((levelNumber-1)%2);
     }
 
-    const counts = Array.from({length:layerCount}, () => 12);
+    const counts = Array.from(
+      {length:layerCount},
+      () => 12
+    );
 
     if (layerCount % 2) {
       counts[Math.floor(layerCount/2)] = 24;
@@ -314,7 +543,9 @@
     const bag = [];
 
     for (let type=0; type<8; type++) {
-      for (let n=0; n<total/8; n++) bag.push(type);
+      for (let n=0; n<total/8; n++) {
+        bag.push(type);
+      }
     }
 
     shuffle(bag);
@@ -324,13 +555,15 @@
 
     counts.forEach((count,layer) => {
       const shape = shapes[
-        (layer + (mode === "hard" ? hardStage-5 : levelNumber-1)) %
-        shapes.length
+        (
+          layer +
+          (mode === "hard" ? hardStage-5 : levelNumber-1)
+        ) % shapes.length
       ];
 
       cellsFor(shape,count,layer+levelNumber).forEach((p,i) => {
         tiles.push({
-          id: layer+"-"+i+"-"+Math.random().toString(36).slice(2,7),
+          id:layer+"-"+i+"-"+Math.random().toString(36).slice(2,7),
           x:p.x,
           y:p.y,
           layer,
@@ -346,13 +579,16 @@
     locked = false;
 
     $("tm-result").style.display = "none";
+
     $("tm-level-label").textContent =
-      mode === "hard" ? "Слои · "+hardStage : "Уровень "+levelNumber;
+      mode === "hard"
+        ? "Хард · уровень " + levelNumber
+        : "Уровень " + levelNumber;
 
-    $("tm-layer-label").textContent =
-      mode === "hard" ? "" : "";
+    $("tm-layer-label").textContent = "";
 
-    $("tm-message").textContent = "Открывай верхние карточки и собирай тройки";
+    $("tm-message").textContent =
+      "Открывай верхние карточки и собирай тройки";
 
     render();
   }
@@ -376,11 +612,18 @@
       const blocked = isBlocked(tile);
       const el = document.createElement("button");
 
-      el.className = "tm-tile" + (blocked ? " blocked" : "");
+      el.className =
+        "tm-tile" + (blocked ? " blocked" : "");
+
       el.textContent = symbols[tile.type][0];
       el.style.color = symbols[tile.type][1];
-      el.style.left = (tile.x*14.2857+tile.layer*0.45)+"%";
-      el.style.top = (tile.y*14.2857-tile.layer*0.45)+"%";
+
+      el.style.left =
+        (tile.x*14.2857+tile.layer*0.45)+"%";
+
+      el.style.top =
+        (tile.y*14.2857-tile.layer*0.45)+"%";
+
       el.style.zIndex = String(20+tile.layer);
       el.disabled = blocked || locked;
 
@@ -389,7 +632,8 @@
         blocked ? "Закрытая карточка" : "Открытая карточка"
       );
 
-      el.addEventListener("click", () => take(tile.id));
+      el.addEventListener("click",() => take(tile.id));
+
       board.appendChild(el);
     });
 
@@ -409,7 +653,9 @@
     }
 
     $("tm-count").textContent = tray.length+"/7";
-    $("tm-progress").style.width = (removed/tiles.length*100)+"%";
+
+    $("tm-progress").style.width =
+      (removed/tiles.length*100)+"%";
   }
 
   function take(id) {
@@ -436,13 +682,18 @@
           left--;
           return false;
         }
+
         return true;
       });
 
       removed += 3;
-      $("tm-message").textContent = "Есть тройка! Слой за слоем";
+
+      $("tm-message").textContent =
+        "Есть тройка! Слой за слоем";
+
     } else {
-      $("tm-message").textContent = "Ищи ещё две такие карточки";
+      $("tm-message").textContent =
+        "Ищи ещё две такие карточки";
     }
 
     render();
@@ -461,13 +712,14 @@
       won ? "Уровень пройден!" : "Панель заполнена";
 
     $("tm-result-text").textContent = won
-      ? "Все карточки разобраны. Готова к следующему слою?"
+      ? "Все карточки разобраны. Готова к следующему уровню?"
       : "Семь ячеек заняты. Попробуй другую последовательность ходов.";
 
     $("tm-result-button").textContent =
       won ? "Следующий уровень" : "Повторить";
 
     nextAction = won ? "next" : "restart";
+
     $("tm-result").style.display = "flex";
   }
 
@@ -480,33 +732,31 @@
     tray = prev.tray;
     removed = prev.removed;
 
-    $("tm-message").textContent = "Последний ход отменён";
+    $("tm-message").textContent =
+      "Последний ход отменён";
+
     render();
-  }
-
-  function updateModeButtons() {
-    game.querySelectorAll("[data-mode]").forEach(button => {
-      button.classList.toggle("active",button.dataset.mode === mode);
-    });
-
-    game.querySelectorAll("[data-stage]").forEach(button => {
-      button.classList.toggle(
-        "active",
-        mode === "hard" && Number(button.dataset.stage) === hardStage
-      );
-    });
-
-    $("tm-stages").classList.toggle("visible",mode === "hard");
   }
 
   function setMode(next) {
     mode = next;
     levelNumber = 1;
+
     updateModeButtons();
     makeLevel();
   }
 
-  $("tm-restart").addEventListener("click",makeLevel);
+  $("tm-restart").addEventListener("click",() => {
+    makeLevel();
+  });
+
+  $("tm-exit").addEventListener("click",() => {
+    game.style.display = "none";
+
+    const back = document.getElementById("mindless-back");
+
+    if (back) back.click();
+  });
 
   $("tm-new").addEventListener("click",() => {
     levelNumber++;
@@ -519,11 +769,11 @@
     $("tm-result").style.display = "none";
 
     if (nextAction === "next") {
+      levelNumber++;
+
       if (mode === "hard") {
         hardStage = hardStage >= 10 ? 5 : hardStage+1;
         updateModeButtons();
-      } else {
-        levelNumber++;
       }
     }
 
@@ -531,12 +781,15 @@
   });
 
   game.querySelectorAll("[data-mode]").forEach(button => {
-    button.addEventListener("click",() => setMode(button.dataset.mode));
+    button.addEventListener("click",() => {
+      setMode(button.dataset.mode);
+    });
   });
 
   game.querySelectorAll("[data-stage]").forEach(button => {
     button.addEventListener("click",() => {
       hardStage = Number(button.dataset.stage);
+
       updateModeButtons();
       makeLevel();
     });
