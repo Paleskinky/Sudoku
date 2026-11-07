@@ -704,7 +704,10 @@
         openSudoku();
         return;
       }
-
+if (card.dataset.game === "triple") {
+  window.startTripleMatch();
+  return;
+}
       const names = {
         triple: "Triple Match",
         bus: "Bus Jam",
